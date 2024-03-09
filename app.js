@@ -142,6 +142,10 @@ async function postNewCheck(area, amount, category) {
   //   return res;
 }
 
+app.get("/", (req, res) => {
+  res.send("Hey this is my API running 🥳");
+});
+
 app.get("/api/users", function (_, res) {
   res.send(usersTest);
 });
