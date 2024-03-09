@@ -1,12 +1,15 @@
 const express = require("express");
+const date = new Date();
+const { Client } = require("@notionhq/client");
 
 const app = express();
 app.use(express.json());
 
 app.use(express.static("public"));
 
-const { Client } = require("@notionhq/client");
-const date = new Date();
+const notion = new Client({
+  auth: "secret_mGHc8wQ6V7NVZ0eRzIF9km0UKLupyzPEgNVnn7yz0uz",
+});
 
 const urkMonth = [
   "Січень",
@@ -21,28 +24,6 @@ const urkMonth = [
   "Жовтень",
   "Листопад",
   "Грудень",
-];
-
-const notion = new Client({
-  auth: "secret_mGHc8wQ6V7NVZ0eRzIF9km0UKLupyzPEgNVnn7yz0uz",
-});
-
-const usersTest = [
-  "Сашуня",
-  "Для дудки",
-  "Тралік",
-  "Фаст Фуд",
-  "Продукти",
-  "Мийка",
-  "Пальне",
-  "Приколюхи",
-  "Обслуговування Авто",
-  "Невідома Витрата",
-  "Хтось вернув",
-  "ЗП Хайп",
-  "Дав тато",
-  "Чай",
-  "Невідомий Дохід",
 ];
 
 async function getCurrentLinkOfMonth() {
@@ -64,7 +45,7 @@ async function getCurrentLinkOfMonth() {
 
   const foundMonth = test.find((month) => month.name === currentMonth).link;
   const rewLink = foundMonth.split("/")[3];
-  //   console.log(rewLink);
+
   return rewLink;
 }
 
@@ -76,7 +57,6 @@ async function getAllCaregories() {
     (item) => item.name
   );
 
-  //   console.log(res);
   return res;
 }
 
@@ -89,19 +69,19 @@ async function getBalance() {
     return (count += test);
   }, 0);
 
-  console.log(myBalance);
-
   return myBalance;
 }
 
 async function postNewCheck(area, amount, category) {
-  //   const category = await getAllCaregories();
   const linkMonth = await getCurrentLinkOfMonth();
   const myPage = await notion.pages.create({
     icon: {
       type: "external",
       external: {
-        url: "https://images.unsplash.com/photo-1525310072745-f49212b5ac6d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1065&q=80",
+        url:
+          area === "Дохід"
+            ? "https://www.notion.so/icons/arrow-up-basic_green.svg"
+            : "https://www.notion.so/icons/arrow-down-basic_red.svg",
       },
     },
     parent: {
@@ -138,7 +118,6 @@ async function postNewCheck(area, amount, category) {
     },
   });
 
-  console.log(myPage);
   //   return res;
 }
 
@@ -146,26 +125,22 @@ app.get("/", (req, res) => {
   res.send("Hey this is my API running 🥳");
 });
 
-app.get("/api/users", function (_, res) {
-  res.send(usersTest);
-});
-// получение одного пользователя по id
 app.get("/api/categories", async function (req, res) {
   const categories = await getAllCaregories();
   res.send(categories);
 });
+
 app.get("/api/balance", async function (req, res) {
   const balance = await getBalance();
   res.send(`${balance}`);
 });
-// получение отправленных данных
+
 app.post("/api/users", async function (req, res) {
   if (!req.body) return res.sendStatus(400);
 
   const amount = req.body.amount;
   const category = req.body.category;
   const area = req.body.area;
-  // const notes = req.body.notes;
 
   const resp = await postNewCheck(area, amount, category);
 
