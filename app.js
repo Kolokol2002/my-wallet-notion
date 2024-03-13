@@ -72,7 +72,7 @@ async function getBalance() {
   return myBalance;
 }
 
-async function postNewCheck(area, amount, category) {
+async function postNewCheck(area, amount, category, note) {
   const linkMonth = await getCurrentLinkOfMonth();
   const myPage = await notion.pages.create({
     icon: {
@@ -108,6 +108,15 @@ async function postNewCheck(area, amount, category) {
           name: area,
         },
       },
+      Notes: {
+        rich_text: [
+          {
+            text: {
+              content: note,
+            },
+          },
+        ],
+      },
       Month: {
         relation: [
           {
@@ -141,8 +150,9 @@ app.post("/api/users", async function (req, res) {
   const amount = req.body.amount;
   const category = req.body.category;
   const area = req.body.area;
+  const note = req.body.note;
 
-  const resp = await postNewCheck(area, amount, category);
+  const resp = await postNewCheck(area, amount, category, note);
 
   res.send(resp);
 });
